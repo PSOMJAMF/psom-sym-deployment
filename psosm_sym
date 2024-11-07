@@ -112,10 +112,10 @@ emailEnding="@pennmedicine.upenn.edu"
 positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # [SYM-Helper] Branding overrides
-brandingBanner="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/DartLogo.png" # [Image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
+brandingBanner="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/DartLogo.png" # [Image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
 brandingBannerDisplayText="true"
-brandingIconLight="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/PennMedLogo.png"
-brandingIconDark="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/PennMedLogo.png"
+brandingIconLight="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMed.png"
+brandingIconDark="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png"
 
 # [SYM-Helper] IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Support Team Name"
