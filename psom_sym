@@ -42,7 +42,7 @@
 scriptVersion="1.15.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/_lsp.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
-debugMode="${5:-"false"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
+debugMode="${5:-"true"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
 welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
@@ -114,16 +114,17 @@ positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -
 # [SYM-Helper] Branding overrides
 brandingBanner="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/DartLogo.png" 
 brandingBannerDisplayText="false"
-brandingIconLight="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMed.png"
+brandingIconLight="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png"
 brandingIconDark="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png"
 
 # [SYM-Helper] IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="PMACS"
 supportTeamPhone=""
-supportTeamEmail=""
+supportTeamEmail="medhelp@pennmedicine.upenn.edu "
 supportTeamChat=""
-supportTeamChatHyperlink=""
-supportTeamWebsite="helpdesk.pmacs.upenn.edu"
+supportTeamChatHyperlink=" "
+supportTeamWebsite="https://www.med.upenn.edu/pmacs/"
+supportTeamHelpDesk="helpdesk.pmacs.upenn.edu"
 supportTeamHyperlink="[${supportTeamWebsite}](https://${supportTeamWebsite})"
 supportKB=""
 supportTeamErrorKB=""
@@ -2164,6 +2165,10 @@ fi
 if [ -n "${supportTeamWebsite}" ]; then
   helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
 fi
+
+if [ -n "${supportTeamWebsite}" ]; then
+  helpmessage+="- **Help Desk**: ${supportTeamHelpDesk}  \n"
+fi
         
 if [ -n "${supportKB}" ]; then
   helpmessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}  \n"
@@ -2284,7 +2289,7 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Bind to PMACS",
                         "subtitle": "Binds to PMACS Domain",
-                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/PennMedLogo.png",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
                         "progresstext": "Binding to PMACS Domain",
                         "trigger_list": [
                                          {
@@ -2368,7 +2373,7 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Default Desktop Shortcuts",
                         "subtitle": "Shortcuts to PMACS helpdesk and password reset tool",
-                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/PennMedLogo.png",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
                         "progresstext": "Seting up Default Desktop Shortcuts",
                         "trigger_list": [
                                          {
