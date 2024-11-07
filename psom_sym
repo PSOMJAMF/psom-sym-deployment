@@ -125,7 +125,8 @@ supportTeamChat=""
 supportTeamChatHyperlink=" "
 supportTeamWebsite="https://www.med.upenn.edu/pmacs/"
 supportTeamHelpDesk="helpdesk.pmacs.upenn.edu"
-supportTeamHyperlink="[${supportTeamWebsite}](https://${supportTeamWebsite})"
+supportTeamHelpDeskHyperLink="[${supportTeamWebsite}](https://${supportTeamWebsite})"
+supportTeamHyperlink="[${supportTeamHelpDesk}](https://${supportHelpDesk})"
 supportKB=""
 supportTeamErrorKB=""
 supportTeamHours="Monday through Friday, 8 a.m. to 5 p.m."
@@ -383,6 +384,10 @@ function finalise(){
 
                 if [[ -n "${supportTeamWebsite}" ]]; then
                     supportContactMessage+="- **Web**: ${supportTeamHyperlink}\n"
+                fi
+
+                if [[ -n "${supportTeamHelpDesk}" ]]; then
+                    supportContactMessage+="- **Help Desk**: ${supportTeamHelpDeskHyperlink}\n"
                 fi
 
                 if [[ -n "${supportKB}" ]]; then
@@ -1902,6 +1907,10 @@ if [[ -n "${supportTeamName}" ]]; then
     if [[ -n "${supportTeamWebsite}" ]]; then
         welcomeMessage+="- **Web**: ${supportTeamHyperlink}\n"
     fi
+    
+    if [[ -n "${supportTeamHelpDesk}" ]]; then
+        welcomeMessage+="- **Help Desk**: ${supportTeamHelpDeskHyperlink}\n"
+    fi
 
     if [[ -n "${supportKB}" ]]; then
         welcomeMessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}\n"
@@ -2166,8 +2175,8 @@ if [ -n "${supportTeamWebsite}" ]; then
   helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
 fi
 
-if [ -n "${supportTeamWebsite}" ]; then
-  helpmessage+="- **Help Desk**: ${supportTeamHelpDesk}  \n"
+if [ -n "${supportTeamHelpDesk}" ]; then
+  helpmessage+="- **Help Desk**: ${supportTeamHelpDeskHyperlink}  \n"
 fi
         
 if [ -n "${supportKB}" ]; then
@@ -3038,6 +3047,10 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
             if [[ -n "${supportTeamWebsite}" ]]; then
                 helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
+            fi
+
+            if [[ -n "${supportHelpDesk}" ]]; then
+                helpmessage+="- **Help Desk**: ${supportTeamHelpDeskHyperlink}  \n"
             fi
         
             if [[ -n "${supportKB}" ]]; then
