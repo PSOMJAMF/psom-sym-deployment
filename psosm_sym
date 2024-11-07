@@ -103,7 +103,7 @@ departmentListRaw=""
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # An unsorted, comma-separated list of departments (with possible duplication). If empty and promptForPosition is "true" a user-input box will be shown instead of a dropdown
-positionListRaw="Developer,Management,Sales,Marketing"
+positionListRaw=""
 
 # Email ending variable
 emailEnding="@pennmedicine.upenn.edu"
@@ -112,21 +112,21 @@ emailEnding="@pennmedicine.upenn.edu"
 positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # [SYM-Helper] Branding overrides
-brandingBanner="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/DartLogo.png" # [Image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
-brandingBannerDisplayText="true"
+brandingBanner="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/DartLogo.png" 
+brandingBannerDisplayText="false"
 brandingIconLight="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMed.png"
 brandingIconDark="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png"
 
 # [SYM-Helper] IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
-supportTeamName="Support Team Name"
+supportTeamName="PMACS"
 supportTeamPhone=""
 supportTeamEmail=""
-supportTeamChat="chat.support.domain.com"
-supportTeamChatHyperlink="[${supportTeamChat}](https://${supportTeamChat})"
-supportTeamWebsite=""
-supportTeamHyperlink="[${supportTeamWebsite}](https://${supportTeamWebsite})"
+supportTeamChat=""
+supportTeamChatHyperlink=""
+supportTeamWebsite="helpdesk.pmacs.upenn.edu"
+supportTeamHyperlink=""
 supportKB=""
-supportTeamErrorKB="[KB8675309](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=KB8675309#Failures)"
+supportTeamErrorKB=""
 supportTeamHours="Monday through Friday, 8 a.m. to 5 p.m."
 
 # Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
@@ -153,7 +153,7 @@ exitCode="0"
 # Configuration Variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-configurationDownloadEstimation="true"      # [ true (default) | false ]
+configurationDownloadEstimation="false"      # [ true (default) | false ]
 correctionCoefficient="1.01"                # "Fudge factor" (to help estimate match reality)
 
 configurationCatchAllSize="34"              # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
