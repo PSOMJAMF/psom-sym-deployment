@@ -124,12 +124,12 @@ supportTeamEmail=""
 supportTeamChat=""
 supportTeamChatHyperlink=""
 supportTeamWebsite="helpdesk.pmacs.upenn.edu"
-supportTeamHyperlink=""
+supportTeamHyperlink="helpdesk.pmacs.upenn.edu"
 supportKB=""
 supportTeamErrorKB=""
 supportTeamHours="Monday through Friday, 8 a.m. to 5 p.m."
 
-# Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
+# Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have been complete [ true | false ] (thanks, @Eltord!)
 lockContinueBeforeEstimations="false"
 
 
