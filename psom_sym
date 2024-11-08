@@ -42,7 +42,7 @@
 scriptVersion="1.15.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/_lsp.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
-debugMode="${5:-"true"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
+debugMode="${5:-"false"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
 welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
@@ -118,7 +118,7 @@ brandingIconLight="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deploymen
 brandingIconDark="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png"
 
 # [SYM-Helper] IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
-supportTeamName="PMACS"
+supportTeamName="PMACS Client Services Group"
 supportTeamPhone=""
 supportTeamEmail="medhelp@pennmedicine.upenn.edu "
 supportTeamChat=""
@@ -161,17 +161,17 @@ correctionCoefficient="1.01"                # "Fudge factor" (to help estimate m
 configurationCatchAllSize="34"              # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
 configurationCatchAllInstallBuffer="0"      # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
-configurationOneName="Required"
+configurationOneName="Standard"
 configurationOneDescription="Minimum organization apps"
 configurationOneSize="34"                   # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
 configurationOneInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
-configurationTwoName="Recommended"
+configurationTwoName="BGS"
 configurationTwoDescription="Required apps and Microsoft 365"
 configurationTwoSize="62"                   # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationTwoInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
-configurationThreeName="Complete"
+configurationThreeName="SPO Public Conference Room"
 configurationThreeDescription="Recommended apps, Adobe Acrobat Reader and Google Chrome"
 configurationThreeSize="106"                # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationThreeInstallBuffer="0"         # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
@@ -368,7 +368,7 @@ function finalise(){
             
             if [[ -n "${supportTeamName}" ]]; then
 
-                supportContactMessage+="If you need assistance, please contact the **${supportTeamName}**:  \n"
+                supportContactMessage+="If you need assistance, please contact **${supportTeamName}**:  \n"
 
                 if [[ -n "${supportTeamPhone}" ]]; then
                     supportContactMessage+="- **Telephone:** ${supportTeamPhone}\n"
@@ -1015,7 +1015,7 @@ function completionAction() {
 
 function welcomeDialogInfoboxAnimation() {
     callingPID=$1
-    # clock_emojis=("🕐" "🕑" "🕒" "🕓" "🕔" "🕕" "🕖" "🕗" "🕘" "🕙" "🕚" "🕛")
+    # clock_emojis=("�" "�" "�" "�" "�" "�" "�" "�" "�" "�" "�" "�")
     clock_emojis=("&#128336;" "&#128337;" "&#128338;" "&#128339;" "&#128340;" "&#128341;" "&#128342;" "&#128343;" "&#128344;" "&#128345;" "&#128346;" "&#128347;")
     while true; do
         for emoji in "${clock_emojis[@]}"; do
@@ -1038,7 +1038,7 @@ function welcomeDialogInfoboxAnimation() {
 
 function setupYourMacDialogInfoboxAnimation() {
     callingPID=$1
-    # clock_emojis=("🕐" "🕑" "🕒" "🕓" "🕔" "🕕" "🕖" "🕗" "🕘" "🕙" "🕚" "🕛")
+    # clock_emojis=("�" "�" "�" "�" "�" "�" "�" "�" "�" "�" "�" "�")
     clock_emojis=("&#128336;" "&#128337;" "&#128338;" "&#128339;" "&#128340;" "&#128341;" "&#128342;" "&#128343;" "&#128344;" "&#128345;" "&#128346;" "&#128347;")
     while true; do
         for emoji in "${clock_emojis[@]}"; do
@@ -1654,7 +1654,7 @@ function acPowerCheck() {
 
 }
 
-acPowerCheck # Comment-out to disable
+# acPowerCheck # Comment-out to disable
 
 
 
@@ -1890,7 +1890,7 @@ welcomeMessage="Please enter the **required** information for your ${modelName},
 
 if [[ -n "${supportTeamName}" ]]; then
 
-    welcomeMessage+="\n\nIf you need assistance, please contact the **${supportTeamName}**:  \n"
+    welcomeMessage+="\n\nIf you need assistance, please contact **${supportTeamName}**:  \n"
 
     if [[ -n "${supportTeamPhone}" ]]; then
         welcomeMessage+="- **Telephone**: ${supportTeamPhone}\n"
@@ -2309,7 +2309,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Kace",
-                        "subtitle": "Agent for KACE Inventory Management",
+                        "subtitle": "KACE Inventory Management",
                         "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_bf33556fd3fd7f6dc2124c7704ceb7e3b1666743ac057ed85f2f388ddc7811d1",
                         "progresstext": "Installing KACE Agent",
                         "trigger_list": [
@@ -2321,7 +2321,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "CrowdStrike Falcon Sensor",
-                        "subtitle": "Provides Endpoint Detection and Response (EDR) ",
+                        "subtitle": "Endpoint Detection and Response (EDR) ",
                         "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_8c481dda0eaa52c3be33fd4de271916459194437b601c73b218de71f53e8543e",
                         "progresstext": "Installing Crowdstrike",
                         "trigger_list": [
@@ -2333,7 +2333,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Adobe Acrobat DC Pro",
-                        "subtitle": "Use to create, edit and share PDF files",
+                        "subtitle": "Create, edit and share PDF files",
                         "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9107045f8d166afc7aa45126606ff6645bc39a7fbce4fb4e97a7563f9fb0225",
                         "progresstext": "Adobe Acrobat is a PDF editing and collaboration tool that allows users to create, edit, and share PDF files",
                         "trigger_list": [
@@ -2357,7 +2357,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Ivanti Secure Access 22.7r3",
-                        "subtitle": "Grants access to PMACS resources remotely",
+                        "subtitle": "Provides access to PMACS domain remotely",
                         "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_4f72997afd6503c70109f1bef77649f08e4c5d63bff17e3fca5b442c57cbbe8e",
                         "progresstext": "Installing Ivanti Secure Access",
                         "trigger_list": [
@@ -2369,7 +2369,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Microsoft 365 Business Pro",
-                        "subtitle": "Provides standard business applications such as Outlook, Word, and Excel",
+                        "subtitle": "Standard business applications such as Outlook, Word, and Excel",
                         "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_e0e0f913a24bc53efa1d66320a709ae906c82d4b10ccf2f8f5d72f4e245ca25f",
                         "progresstext": "Installing Microsoft 365 Applications",
                         "trigger_list": [
@@ -2395,7 +2395,7 @@ function policyJSONConfiguration() {
                         "listitem": "FileVault Disk Encryption",
                         "subtitle": "Encrypts your device",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
-                        "progresstext": "FileVault is built-in to macOS and provides full-disk encryption to help prevent unauthorized access to your Mac.",
+                        "progresstext": "Enabling FileVault",
                         "trigger_list": [
                                          {
                                             "trigger": "filevault",
@@ -2407,7 +2407,7 @@ function policyJSONConfiguration() {
                         "listitem": "Computer Inventory",
                         "subtitle": "Updates Inventory",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
-                        "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
+                        "progresstext": "Updating Inventory",
                         "trigger_list": [
                                          {
                                             "trigger": "recon",
