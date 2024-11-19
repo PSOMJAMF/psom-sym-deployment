@@ -112,7 +112,7 @@ emailEnding="@pennmedicine.upenn.edu"
 positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # [SYM-Helper] Branding overrides
-brandingBanner="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/DartLogo.png" 
+brandingBanner="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/pmacs_banner.png" 
 brandingBannerDisplayText="false"
 brandingIconLight="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png"
 brandingIconDark="https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png"
