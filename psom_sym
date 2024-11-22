@@ -41,17 +41,23 @@
 
 scriptVersion="1.15.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
-scriptLog="${4:-"/var/log/_lsp.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
-debugMode="${5:-"false"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
-welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
-completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
-requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
-outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
+scriptLog="${4:-""}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
+debugMode="${5:-""}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
+welcomeDialog="${6:-""}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
+completionActionOption="${7:-""}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
+requiredMinimumBuild="${8:-""}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
+outdatedOsAction="${9:-""}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
 swiftDialogMinimumRequiredVersion="2.5.0.4768"                                  # This will be set and updated as dependancies on newer features change.
 
-
+macOSVersion=$(sw_vers | grep "ProductVersion" | awk '{ print $2; }' | awk -F. '{ print $1; }')
+dirPath="/usr/local/_lsp"
+serialNumber=$(system_profiler SPHardwareDataType | awk '/Serial/ {print $4}')
+prestageConfigFilename="PreStage_Config.txt"
+pendingConfigFilename="Pending_Config.txt"
+coreFilename="Core.txt"
+configFilename="Config.txt"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Various Feature Variables
@@ -69,18 +75,18 @@ failureDialog="true"                        # Display the so-called "Failure" di
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # [SYM-Helper] These control which user input boxes are added to the first page of Setup Your Mac. If you do not want to ask about a value, set it to any other value
-promptForUsername="true"
-prefillUsername="true"          # prefills the currently logged in user's username
-promptForRealName="true"
-prefillRealname="true"          # prefills the currently logged in user's fullname
-promptForEmail="true"
+promptForUsername="false"
+prefillUsername="false"          # prefills the currently logged in user's username
+promptForRealName="false"
+prefillRealname="false"          # prefills the currently logged in user's fullname
+promptForEmail="false"
 prefillEmail="true"             # prefills the currently logged in user's email. You need to add to email ending variable
 promptForComputerName="true"
 prefillComputerName="true"      # prefills the currently logged in user's current computer name
 promptForAssetTag="false"
 promptForRoom="false"
 promptForBuilding="false"
-promptForDepartment="true"
+promptForDepartment="false"
 promptForPosition="false"        # When set to true dynamically prompts the user to select from a list of positions or manually enter one at the welcomeDialog, see "positionListRaw" to define the selection / entry type
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" or presetConfiguration policyJSON
 
@@ -162,17 +168,17 @@ configurationCatchAllSize="34"              # Catch-all Configuration in Gibibit
 configurationCatchAllInstallBuffer="0"      # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationOneName="Standard"
-configurationOneDescription="Minimum organization apps"
+configurationOneDescription="Standard workstation configuration"
 configurationOneSize="34"                   # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
 configurationOneInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationTwoName="BGS"
-configurationTwoDescription="Required apps and Microsoft 365"
+configurationTwoDescription="Biomedical Graduate Studies deployment"
 configurationTwoSize="62"                   # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationTwoInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationThreeName="SPO Public Conference Room"
-configurationThreeDescription="Recommended apps, Adobe Acrobat Reader and Google Chrome"
+configurationThreeDescription="For SPO Conference Room devices"
 configurationThreeSize="106"                # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationThreeInstallBuffer="0"         # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
@@ -2029,8 +2035,11 @@ if [ "$promptForEmail" == "true" ]; then
         "regexerror" : "Please enter a valid email address."
     },'
 fi
-if [ "$prefillComputerName" == "true" ]; then computerNamePrefill=',"value" : "'${serialNumber}'"'; fi
-if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name"'${computerNamePrefill}'},'; fi
+if [ "$prefillComputerName" == "true" ]; then
+    computerName=$(hostname)
+    computerNamePrefill=',"value" : "'${computerName}'"'
+fi
+if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : true,"prompt" : "Computer Name"'${computerNamePrefill}'},'; fi
 if [ "$promptForAssetTag" == "true" ]; then
     assetTagJSON='{   "title" : "Asset Tag",
         "required" : true,
@@ -2230,7 +2239,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 --button1disabled \
 --infotext \"$scriptVersion\" \
 --titlefont 'shadow=true, size=36, colour=#FFFDF4' \
---messagefont 'size=14' \
+--messagefont 'size=16, align=center' \
 --height '800' \
 --position 'centre' \
 --blurscreen \
@@ -2289,7 +2298,494 @@ function policyJSONConfiguration() {
 
     case ${symConfiguration} in
 
-        * ) # Catch-all )
+        "Standard" ) # Standard Configuration )
+
+            policyJSON='
+            {
+                "steps": [
+        
+                    {
+                        "listitem": "Bind to PMACS",
+                        "subtitle": "",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
+                        "progresstext": "Binding to PMACS Domain",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "BindtoPMACSNonMobile",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Kace",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_bf33556fd3fd7f6dc2124c7704ceb7e3b1666743ac057ed85f2f388ddc7811d1",
+                        "progresstext": "Installing KACE Agent",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symKace",
+                                            "validation": "/Library/Application Support/Quest/KACE/bin/KACEMenuBar.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "CrowdStrike Falcon Sensor",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_8c481dda0eaa52c3be33fd4de271916459194437b601c73b218de71f53e8543e",
+                        "progresstext": "Installing Crowdstrike",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symCrowdStrike",
+                                            "validation": "/Applications/Falcon.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Adobe Acrobat DC Pro",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9107045f8d166afc7aa45126606ff6645bc39a7fbce4fb4e97a7563f9fb0225",
+                        "progresstext": "Installling Adobe Acrobat DC",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symAdobeAcrobatDC",
+                                            "validation": "/Applications/Adobe Acrobat DC/Adobe Acrobat.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Google Chrome",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_09f0fd195e68b12164d9f9ac8f08a66136405b5be01d60c46417e22f72d8b40c",
+                        "progresstext": "Installing Google Chrome",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symGoogleChrome",
+                                            "validation": "/Applications/Google Chrome.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Zoom Client",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_22e0c8b6f7490870c22f645c0768797d6235543874935668809b3165349c0114",
+                        "progresstext": "Installing Zoom Client",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symZoom",
+                                            "validation": "/Applications/Zoom.us.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Ivanti Secure Access 22.7r3",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_4f72997afd6503c70109f1bef77649f08e4c5d63bff17e3fca5b442c57cbbe8e",
+                        "progresstext": "Installing Ivanti Secure Access",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symIvantiSecureAccess",
+                                            "validation": "/Applications/Ivanti Secure Access.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft 365 Business Pro",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_e0e0f913a24bc53efa1d66320a709ae906c82d4b10ccf2f8f5d72f4e245ca25f",
+                        "progresstext": "Installing Microsoft 365 Applications",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symM365",
+                                            "validation": "/Applications/Microsoft Outlook.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Default Desktop Shortcuts",
+                        "subtitle": "",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
+                        "progresstext": "Seting up Default Desktop Shortcuts",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symDefaultShortCut",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Standard Dock Configuration",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9dbaba204cca44170dbb00974c88091cb004665caea6ae2edddc06aa1e1c800",
+                        "progresstext": "Setting Standard Dock Configuration",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symStandardDockConfig",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "FileVault Disk Encryption",
+                        "subtitle": "",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
+                        "progresstext": "Enabling FileVault",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "filevault",
+                                            "validation": "Local"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Computer Inventory",
+                        "subtitle": "",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Updating Inventory",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "recon",
+                                            "validation": "recon"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "New User Account Creation",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_8d86095527d5f9b994aa6bcfbcbab07c02fd18f3ab21b57ef9b3bc53c7584153",
+                        "progresstext": "Creating New User Account",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symNewUser",
+                                            "validation": "none"
+                                         }
+                        ]
+                    }
+                ]
+            }
+            
+            '
+            ;;
+        "BGS" ) # BGS Configuration )
+
+            policyJSON='
+            {
+                "steps": [
+        
+                    {
+                        "listitem": "Bind to PMACS",
+                        "subtitle": "",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
+                        "progresstext": "Binding to PMACS Domain",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "BindtoPMACSNonMobile",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Kace",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_bf33556fd3fd7f6dc2124c7704ceb7e3b1666743ac057ed85f2f388ddc7811d1",
+                        "progresstext": "Installing KACE Agent",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symKace",
+                                            "validation": "/Library/Application Support/Quest/KACE/bin/KACEMenuBar.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "CrowdStrike Falcon Sensor",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_8c481dda0eaa52c3be33fd4de271916459194437b601c73b218de71f53e8543e",
+                        "progresstext": "Installing Crowdstrike",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symCrowdStrike",
+                                            "validation": "/Applications/Falcon.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Adobe Acrobat DC Pro",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9107045f8d166afc7aa45126606ff6645bc39a7fbce4fb4e97a7563f9fb0225",
+                        "progresstext": "Installing Adobe Acrobat Pro",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symAdobeAcrobatDC",
+                                            "validation": "/Applications/Adobe Acrobat DC/Adobe Acrobat.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Google Chrome",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_09f0fd195e68b12164d9f9ac8f08a66136405b5be01d60c46417e22f72d8b40c",
+                        "progresstext": "Installing Google Chrome",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symGoogleChrome",
+                                            "validation": "/Applications/Google Chrome.app"
+                                         }
+                        ]
+                    },                    
+                    {
+                        "listitem": "Zoom Client",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_22e0c8b6f7490870c22f645c0768797d6235543874935668809b3165349c0114",
+                        "progresstext": "Installing Zoom Client",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symZoom",
+                                            "validation": "/Applications/Zoom.us.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Ivanti Secure Access 22.7r3",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_4f72997afd6503c70109f1bef77649f08e4c5d63bff17e3fca5b442c57cbbe8e",
+                        "progresstext": "Installing Ivanti Secure Access",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symIvantiSecureAccess",
+                                            "validation": "/Applications/Ivanti Secure Access.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft 365 Business Pro",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_e0e0f913a24bc53efa1d66320a709ae906c82d4b10ccf2f8f5d72f4e245ca25f",
+                        "progresstext": "Installing Microsoft 365 Applications",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symM365",
+                                            "validation": "/Applications/Microsoft Outlook.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Default Desktop Shortcuts",
+                        "subtitle": "",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
+                        "progresstext": "Seting up Default Desktop Shortcuts",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symDefaultShortCut",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "BGS Dock Configuration",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9dbaba204cca44170dbb00974c88091cb004665caea6ae2edddc06aa1e1c800",
+                        "progresstext": "Setting BGS Dock Configuration",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symBGSDockConfig",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "FileVault Disk Encryption",
+                        "subtitle": "",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
+                        "progresstext": "Enabling FileVault",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "filevault",
+                                            "validation": "Local"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Computer Inventory",
+                        "subtitle": "",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Updating Inventory",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "recon",
+                                            "validation": "recon"
+                                         }
+                        ]
+                    }
+                ]
+            }
+            '
+            ;;
+ "SPO Public Conference Room" ) # SPO Public Conference Room)
+
+            policyJSON='
+            {
+                "steps": [
+        
+                    {
+                        "listitem": "Bind to PMACS",
+                        "subtitle": "",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
+                        "progresstext": "Binding to PMACS Domain",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "BindtoPMACSNonMobile",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Kace",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_bf33556fd3fd7f6dc2124c7704ceb7e3b1666743ac057ed85f2f388ddc7811d1",
+                        "progresstext": "Installing KACE Agent",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symKace",
+                                            "validation": "/Library/Application Support/Quest/KACE/bin/KACEMenuBar.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "CrowdStrike Falcon Sensor",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_8c481dda0eaa52c3be33fd4de271916459194437b601c73b218de71f53e8543e",
+                        "progresstext": "Installing Crowdstrike",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symCrowdStrike",
+                                            "validation": "/Applications/Falcon.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Adobe Acrobat DC Pro",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9107045f8d166afc7aa45126606ff6645bc39a7fbce4fb4e97a7563f9fb0225",
+                        "progresstext": "Adobe Acrobat is a PDF editing and collaboration tool that allows users to create, edit, and share PDF files",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symAdobeAcrobatDC",
+                                            "validation": "/Applications/Adobe Acrobat DC/Adobe Acrobat.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Google Chrome",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_09f0fd195e68b12164d9f9ac8f08a66136405b5be01d60c46417e22f72d8b40c",
+                        "progresstext": "Installing Google Chrome",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symGoogleChrome",
+                                            "validation": "/Applications/Google Chrome.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Zoom Client",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_22e0c8b6f7490870c22f645c0768797d6235543874935668809b3165349c0114",
+                        "progresstext": "Installing Zoom Client",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symZoom",
+                                            "validation": "/Applications/Zoom.us.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "VLC",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_9a8f49497b819bd89291f95ab99b9b10c0890f9f52438734f600ad1d4e897429",
+                        "progresstext": "Installing VLC",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symVLC",
+                                            "validation": "/Applications/VLC.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Ivanti Secure Access 22.7r3",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_4f72997afd6503c70109f1bef77649f08e4c5d63bff17e3fca5b442c57cbbe8e",
+                        "progresstext": "Installing Ivanti Secure Access",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symIvantiSecureAccess",
+                                            "validation": "/Applications/Ivanti Secure Access.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft 365 Business Pro",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_e0e0f913a24bc53efa1d66320a709ae906c82d4b10ccf2f8f5d72f4e245ca25f",
+                        "progresstext": "Installing Microsoft 365 Applications",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symM365",
+                                            "validation": "/Applications/Microsoft Outlook.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Default Desktop Shortcuts",
+                        "subtitle": "",
+                        "icon": "https://raw.githubusercontent.com/PSOMJAMF/psom-sym-deployment/refs/heads/main/Images/PennMedLogo.png",
+                        "progresstext": "Seting up Default Desktop Shortcuts",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symDefaultShortCut",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "SPO Public Conference Room Dock Configuration",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9dbaba204cca44170dbb00974c88091cb004665caea6ae2edddc06aa1e1c800",
+                        "progresstext": "Setting SPO Public Conference Room Dock Configuration",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symPresDockConfig",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "FileVault Disk Encryption",
+                        "subtitle": "",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
+                        "progresstext": "Enabling FileVault",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "filevault",
+                                            "validation": "Local"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Computer Inventory",
+                        "subtitle": "",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Updating Inventory",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "recon",
+                                            "validation": "recon"
+                                         }
+                        ]
+                    }
+                ]
+            }
+            '
+            ;;
+ "Presentation" ) # Catch all )
 
             policyJSON='
             {
@@ -2314,7 +2810,7 @@ function policyJSONConfiguration() {
                         "progresstext": "Installing KACE Agent",
                         "trigger_list": [
                                          {
-                                            "trigger": "SYMKace",
+                                            "trigger": "symKace",
                                             "validation": "/Library/Application Support/Quest/KACE/bin/KACEMenuBar.app"
                                          }
                         ]
@@ -2326,7 +2822,7 @@ function policyJSONConfiguration() {
                         "progresstext": "Installing Crowdstrike",
                         "trigger_list": [
                                          {
-                                            "trigger": "SYMCrowdStrike",
+                                            "trigger": "symCrowdStrike",
                                             "validation": "/Applications/Falcon.app"
                                          }
                         ]
@@ -2338,7 +2834,7 @@ function policyJSONConfiguration() {
                         "progresstext": "Adobe Acrobat is a PDF editing and collaboration tool that allows users to create, edit, and share PDF files",
                         "trigger_list": [
                                          {
-                                            "trigger": "SYMAdobeAcrobatDC",
+                                            "trigger": "symAdobeAcrobatDC",
                                             "validation": "/Applications/Adobe Acrobat DC/Adobe Acrobat.app"
                                          }
                         ]
@@ -2350,8 +2846,32 @@ function policyJSONConfiguration() {
                         "progresstext": "Installing Google Chrome",
                         "trigger_list": [
                                          {
-                                            "trigger": "SYMGoogleChrome",
+                                            "trigger": "symGoogleChrome",
                                             "validation": "/Applications/Google Chrome.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Zoom Client",
+                        "subtitle": "Zoom is a communications platform that allows users to connect with video, audio, phone, and chat.",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_22e0c8b6f7490870c22f645c0768797d6235543874935668809b3165349c0114",
+                        "progresstext": "Installing Zoom Client",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symZoom",
+                                            "validation": "/Applications/Zoom.us.app"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "VLC",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_9a8f49497b819bd89291f95ab99b9b10c0890f9f52438734f600ad1d4e897429",
+                        "progresstext": "Installing VLC",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symVLC",
+                                            "validation": "/Applications/VLC.app"
                                          }
                         ]
                     },
@@ -2362,7 +2882,7 @@ function policyJSONConfiguration() {
                         "progresstext": "Installing Ivanti Secure Access",
                         "trigger_list": [
                                          {
-                                            "trigger": "SYMIvantiSecureAccess",
+                                            "trigger": "symIvantiSecureAccess",
                                             "validation": "/Applications/Ivanti Secure Access.app"
                                          }
                         ]
@@ -2374,7 +2894,7 @@ function policyJSONConfiguration() {
                         "progresstext": "Installing Microsoft 365 Applications",
                         "trigger_list": [
                                          {
-                                            "trigger": "SYMO365",
+                                            "trigger": "symM365",
                                             "validation": "/Applications/Microsoft Outlook.app"
                                          }
                         ]
@@ -2386,7 +2906,19 @@ function policyJSONConfiguration() {
                         "progresstext": "Seting up Default Desktop Shortcuts",
                         "trigger_list": [
                                          {
-                                            "trigger": "SYMDefaultShortCut",
+                                            "trigger": "symDefaultShortCut",
+                                            "validation": "None"
+                                         }
+                        ]
+                    },
+                    {
+                        "listitem": "Presentation Dock Configuration",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9dbaba204cca44170dbb00974c88091cb004665caea6ae2edddc06aa1e1c800",
+                        "progresstext": "Setting Presentation Dock Configuration",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symPresDockConfig",
                                             "validation": "None"
                                          }
                         ]
@@ -2419,7 +2951,6 @@ function policyJSONConfiguration() {
             }
             '
             ;;
-
     esac
 
 }
@@ -3135,6 +3666,38 @@ for (( i=0; i<dialog_step_length; i++ )); do
 
 done
 
+
+[ -d "${dirPath}" ] && {
+    echo "${dirPath} exists."
+} || {
+    echo "${dirPath} does not exist. Creating folder."
+    mkdir "${dirPath}"
+}
+
+echo "Creating $pendingConfigFilename for pending deployment."
+echo "${symConfiguration}" > "$dirPath/$pendingConfigFilename"
+echo "$pendingConfigFilename file has been created and set to ${symConfiguration}."
+
+[ $macOSVersion -ge 13 ] && {
+    open -b com.apple.systempreferences /System/Library/PreferencePanes/SharingPref.prefpane
+    osascript -e "display dialog \"On Macs with macOS 13 and onwards, Jamf is no longer able to automatically enable Remote Management. If you haven't already, please do so manually before proceeding forward with deployment.\" with title \"Mac Deployment\" buttons {\"OK\"} default button 1"
+}
+
+oucheck=1
+
+[ $bindcheck -eq 0 ] && [ $networkcheck -eq 0 ] && {
+    domainName=$(dsconfigad -show | grep "Computer Account" | awk '{print $4}' | sed 's/.$//')
+    dscl "/Active Directory/PMACS/All Domains" read /Computers/${domainName}$ dsAttrTypeNative:distinguishedName | tail -1 | grep "OU=New Computers"
+    oucheck=$?
+}
+
+[ $oucheck -eq 0 ] && {
+    [ "$domainName" != "" ] && {
+        osascript -e "display dialog \"$domainName is currently in the New Computers OU. Be sure to move it to the appropriate OU before 6pm on Thursday to avoid it being disabled in AD.\" with title \"Mac Deployment\" buttons {\"OK\"} default button 1"
+    }
+}
+
+jamf recon
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
