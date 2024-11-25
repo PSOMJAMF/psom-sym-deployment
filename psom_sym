@@ -51,13 +51,6 @@ webhookURL="${10:-""}"                                                          
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
 swiftDialogMinimumRequiredVersion="2.5.0.4768"                                  # This will be set and updated as dependancies on newer features change.
 
-macOSVersion=$(sw_vers | grep "ProductVersion" | awk '{ print $2; }' | awk -F. '{ print $1; }')
-dirPath="/usr/local/_lsp"
-serialNumber=$(system_profiler SPHardwareDataType | awk '/Serial/ {print $4}')
-prestageConfigFilename="PreStage_Config.txt"
-pendingConfigFilename="Pending_Config.txt"
-coreFilename="Core.txt"
-configFilename="Config.txt"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Various Feature Variables
@@ -2036,7 +2029,7 @@ if [ "$promptForEmail" == "true" ]; then
     },'
 fi
 if [ "$prefillComputerName" == "true" ]; then
-    computerName=$(hostname)
+    computerName=$(hostname -s)
     computerNamePrefill=',"value" : "'${computerName}'"'
 fi
 if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : true,"prompt" : "Computer Name"'${computerNamePrefill}'},'; fi
@@ -3667,16 +3660,59 @@ for (( i=0; i<dialog_step_length; i++ )); do
 done
 
 
-[ -d "${dirPath}" ] && {
-    echo "${dirPath} exists."
-} || {
-    echo "${dirPath} does not exist. Creating folder."
-    mkdir "${dirPath}"
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Set System Extension for Deployment Configuration
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+scriptVersion="0.0.3"
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin
+reverseDomainNameNotation="com.pennmedicine"
+filepath="/Library/Preferences/${reverseDomainNameNotation}.plist"
+key1="SYM Deployment Configuration"      # Name of the "key" for which the value will be set
+value1="${symConfiguration}"    # The value to which "key" will be set
+key2="SYM Deployment Status"
+value2="Complete"
+# Write Plist Value
+
+function writePlistValue() {
+    # Variables
+    key="${1}"        # Name of the "key" for which the value will be set
+    value="${2}"    # The value to which "key" will be set
+    /usr/bin/defaults write "${filepath}" "${key}" -string "${value}"
 }
 
-echo "Creating $pendingConfigFilename for pending deployment."
-echo "${symConfiguration}" > "$dirPath/$pendingConfigFilename"
-echo "$pendingConfigFilename file has been created and set to ${symConfiguration}."
+# Read Plist Value
+
+function readPlistValue() {
+    # Variables
+    key="${1}"        # Name of the "key" for which the value will be set
+    writtenValue=$( /usr/bin/defaults read "${filepath}" "${key}" 2>&1 )
+}
+
+
+# Write Plist Value
+
+writePlistValue "${key1}" "${value1}"
+
+writePlistValue "${key2}" "${value2}"
+
+
+# Read Plist Value
+
+readPlistValue "${key1}"
+readPlistValue "${key2}"
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Complete processing and enable the "Done" button
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+id sghost
+bindcheck=$? && echo "bindcheck=$bindcheck"
+ping -c 3 pmacs.upenn.edu
+networkcheck=$? && echo "networkcheck=$networkcheck"
+macOSVersion=$(sw_vers | grep "ProductVersion" | awk '{ print $2; }' | awk -F. '{ print $1; }')
+
 
 [ $macOSVersion -ge 13 ] && {
     open -b com.apple.systempreferences /System/Library/PreferencePanes/SharingPref.prefpane
@@ -3697,13 +3733,9 @@ oucheck=1
     }
 }
 
-jamf recon
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Complete processing and enable the "Done" button
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 outputLineNumberInVerboseDebugMode
+
+jamf recon
 
 finalise
