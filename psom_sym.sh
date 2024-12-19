@@ -39,6 +39,8 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+
+symUser=${3}
 scriptVersion="1.15.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-""}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
@@ -1231,7 +1233,7 @@ function webHookMessage() {
                         },
                         {
                             "type": "mrkdwn",
-                            "text": "*User:*\n${loggedInUser}"
+                            "text": "*User:*\n${symUser}"
                         },
                         {
                             "type": "mrkdwn",
@@ -1300,7 +1302,7 @@ EOF
             "value": "${symConfiguration}"
         }, {
             "name": "User",
-            "value": "${loggedInUser}"
+            "value": "${symUser}"
         }, {
             "name": "Operating System Version",
             "value": "${osVersion} (${osBuild})"
@@ -2304,7 +2306,7 @@ function policyJSONConfiguration() {
                         "progresstext": "Binding to PMACS Domain",
                         "trigger_list": [
                                          {
-                                            "trigger": "BindtoPMACSNonMobile",
+                                            "trigger": "symBindtoPMACSNoneMobile",
                                             "validation": "None"
                                          }
                         ]
@@ -2401,18 +2403,6 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                                          {
                                             "trigger": "symDefaultShortCut",
-                                            "validation": "None"
-                                         }
-                        ]
-                    },
-                    {
-                        "listitem": "Standard Dock Configuration",
-                        "subtitle": "",
-                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_b9dbaba204cca44170dbb00974c88091cb004665caea6ae2edddc06aa1e1c800",
-                        "progresstext": "Setting Standard Dock Configuration",
-                        "trigger_list": [
-                                         {
-                                            "trigger": "symStandardDockConfig",
                                             "validation": "None"
                                          }
                         ]
@@ -2555,7 +2545,7 @@ function policyJSONConfiguration() {
                         "progresstext": "Installing Microsoft 365 Applications",
                         "trigger_list": [
                                          {
-                                            "trigger": "symM365",
+                                            "trigger": "1symM365",
                                             "validation": "/Applications/Microsoft Outlook.app"
                                          }
                         ]
@@ -3661,17 +3651,26 @@ done
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Set System Extension for Deployment Configuration
+# Prompt to enable remote management and move device from New Computers OU
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+dialog --title "Mac Deployment" -m "$domainName is currently in the New Computers OU. Be sure to move it to the appropriate OU before 6pm on Thursday to avoid it being disabled in AD." --icon "$brandingIconLight" --centericon --messagealignment "center" --buttonstyle center
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Set System Extension for Deployment Configuration & Completion ref: https://snelson.us/2023/12/breadcrumbs/
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 scriptVersion="0.0.3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
-reverseDomainNameNotation="com.pennmedicine"
-filepath="/Library/Preferences/${reverseDomainNameNotation}.plist"
-key1="SYM Deployment Configuration"      # Name of the "key" for which the value will be set
-value1="${symConfiguration}"    # The value to which "key" will be set
-key2="SYM Deployment Status"
-value2="Complete"
+reverseDomainNameNotation="com.pennmedicine" # Reverse domain name i.e. PennMedicine
+filepath="/Library/Preferences/${reverseDomainNameNotation}.plist" # plist based off of reverse domain name
+key1="SYM Deployment Configuration"      # Key to answer the question, "How was this device deployed"
+value1="${symConfiguration}"    # Value to answer the question of key1
+key2="SYM Deployment Status" # Key to answer the question, "Was deployment completed"
+value2="Complete" # Assumes "Complete" deployment as this section is at the end of the script
+
 # Write Plist Value
 
 function writePlistValue() {
@@ -3690,6 +3689,7 @@ function readPlistValue() {
 }
 
 
+if [[ "${debugMode}" == "false" ]]; then 
 # Write Plist Value
 
 writePlistValue "${key1}" "${value1}"
@@ -3702,37 +3702,12 @@ writePlistValue "${key2}" "${value2}"
 readPlistValue "${key1}"
 readPlistValue "${key2}"
 
+fi
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Complete processing and enable the "Done" button
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-id sghost
-bindcheck=$? && echo "bindcheck=$bindcheck"
-ping -c 3 pmacs.upenn.edu
-networkcheck=$? && echo "networkcheck=$networkcheck"
-macOSVersion=$(sw_vers | grep "ProductVersion" | awk '{ print $2; }' | awk -F. '{ print $1; }')
-
-
-[ $macOSVersion -ge 13 ] && {
-    open -b com.apple.systempreferences /System/Library/PreferencePanes/SharingPref.prefpane
-    osascript -e "display dialog \"On Macs with macOS 13 and onwards, Jamf is no longer able to automatically enable Remote Management. If you haven't already, please do so manually before proceeding forward with deployment.\" with title \"Mac Deployment\" buttons {\"OK\"} default button 1"
-}
-
-oucheck=1
-
-[ $bindcheck -eq 0 ] && [ $networkcheck -eq 0 ] && {
-    domainName=$(dsconfigad -show | grep "Computer Account" | awk '{print $4}' | sed 's/.$//')
-    dscl "/Active Directory/PMACS/All Domains" read /Computers/${domainName}$ dsAttrTypeNative:distinguishedName | tail -1 | grep "OU=New Computers"
-    oucheck=$?
-}
-
-[ $oucheck -eq 0 ] && {
-    [ "$domainName" != "" ] && {
-        osascript -e "display dialog \"$domainName is currently in the New Computers OU. Be sure to move it to the appropriate OU before 6pm on Thursday to avoid it being disabled in AD.\" with title \"Mac Deployment\" buttons {\"OK\"} default button 1"
-    }
-}
-
 
 outputLineNumberInVerboseDebugMode
 
