@@ -2372,6 +2372,18 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
+                        "listitem": "Splashtop SOS",
+                        "subtitle": "",
+                        "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_eb04faf569a98d2d53a65c2707b72b1015877aba083b2e1dd5da377feb883a65",
+                        "progresstext": "Installing Splashtop SOS",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "symSplashtopSOS",
+                                            "validation": "/Applications/Splashtop SOS.app"
+                                         }
+                        ]
+                    },
+                    {
                         "listitem": "Ivanti Secure Access 22.7r3",
                         "subtitle": "",
                         "icon": "https://use2.ics.services.jamfcloud.com/icon/hash_4f72997afd6503c70109f1bef77649f08e4c5d63bff17e3fca5b442c57cbbe8e",
