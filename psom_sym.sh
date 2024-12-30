@@ -3667,7 +3667,7 @@ done
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
-dialog --title "Mac Deployment" -m "$domainName is currently in the New Computers OU. Be sure to move it to the appropriate OU before 6pm on Thursday to avoid it being disabled in AD." --icon "$brandingIconLight" --centericon --messagealignment "center" --buttonstyle center
+dialog --title "Mac Deployment" -m "$domainName is currently in the New Computers OU. Be sure to move it to the appropriate OU before 6pm on Thursday to avoid it being disabled in AD." --icon "$brandingIconLight" --centericon --messagealignment "center" --buttonstyle center --ontop
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
